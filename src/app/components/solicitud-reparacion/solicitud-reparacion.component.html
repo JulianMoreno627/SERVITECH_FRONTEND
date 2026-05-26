@@ -1,0 +1,77 @@
+<div class="max-w-4xl mx-auto font-['Plus_Jakarta_Sans']">
+  <div class="mb-8">
+    <h2 class="text-3xl font-black text-slate-900 tracking-tight">Solicitar Reparación</h2>
+    <p class="text-slate-500 font-medium">Cuéntanos qué problema tiene tu equipo y agendaremos una revisión técnica.</p>
+  </div>
+
+  <div *ngIf="success" class="bg-emerald-50 border border-emerald-100 p-8 rounded-[2.5rem] text-center mb-8 animate-fade-in">
+    <div class="w-20 h-20 bg-emerald-500 text-white rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-emerald-500/20">
+      <i class="fas fa-check text-3xl"></i>
+    </div>
+    <h3 class="text-2xl font-black text-slate-900 mb-2">¡Solicitud Enviada!</h3>
+    <p class="text-slate-600 font-medium">Tu orden ha sido registrada. Un técnico revisará tu solicitud pronto.</p>
+    <p class="text-xs text-slate-400 mt-4 uppercase tracking-widest font-bold">Redirigiendo al panel principal...</p>
+  </div>
+
+  <form *ngIf="!success" [formGroup]="solicitudForm" (ngSubmit)="onSubmit()" class="space-y-8">
+    <div formGroupName="equipo" class="bg-white p-10 rounded-[2.5rem] shadow-sm border border-slate-100 space-y-8">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div>
+          <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 ml-1">Tipo de Electrodoméstico</label>
+          <div class="relative group">
+            <select formControlName="tipo" class="block w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all duration-300 font-bold appearance-none">
+              <option value="">Seleccione un tipo</option>
+              <option *ngFor="let tipo of tiposEquipo" [value]="tipo">{{ tipo }}</option>
+            </select>
+            <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-slate-400">
+              <i class="fas fa-chevron-down"></i>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 ml-1">Marca</label>
+          <input formControlName="marca" type="text" class="block w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all duration-300 font-bold" placeholder="Ej: LG, Samsung, Whirlpool">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 ml-1">Modelo</label>
+          <input formControlName="modelo" type="text" class="block w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all duration-300 font-bold" placeholder="Ej: Inverter Direct Drive">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 ml-1">Número de Serie (Opcional)</label>
+          <input formControlName="numeroSerie" type="text" class="block w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all duration-300 font-bold" placeholder="Ej: SN123456789">
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 ml-1">Descripción de la Falla</label>
+        <textarea formControlName="descripcionFalla" rows="4" class="block w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all duration-300 font-medium resize-none" placeholder="Describe detalladamente qué problema presenta el equipo..."></textarea>
+        <p class="mt-2 text-[10px] text-slate-400 font-bold uppercase tracking-tight">Mínimo 10 caracteres</p>
+      </div>
+    </div>
+
+    <div *ngIf="error" class="bg-rose-50 border border-rose-100 p-4 rounded-2xl flex items-center space-x-3">
+      <i class="fas fa-exclamation-circle text-rose-500"></i>
+      <p class="text-sm font-bold text-rose-700">{{ error }}</p>
+    </div>
+
+    <div class="flex flex-col md:flex-row gap-4">
+      <button type="submit" [disabled]="solicitudForm.invalid || loading" class="flex-1 relative group overflow-hidden py-4 px-8 rounded-2xl bg-slate-900 text-white font-bold transition-all duration-300 hover:shadow-2xl hover:shadow-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed transform active:scale-[0.98]">
+        <div class="absolute inset-0 w-full h-full bg-gradient-to-r from-blue-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+        <span class="relative flex items-center justify-center space-x-2">
+          <span *ngIf="!loading">Confirmar Solicitud</span>
+          <span *ngIf="loading" class="flex items-center">
+            <i class="fas fa-circle-notch animate-spin mr-3"></i> Procesando...
+          </span>
+          <i *ngIf="!loading" class="fas fa-paper-plane group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform"></i>
+        </span>
+      </button>
+
+      <a routerLink="/dashboard" class="px-8 py-4 bg-white border border-slate-200 text-slate-600 font-bold rounded-2xl hover:bg-slate-50 transition-all text-center">
+        Cancelar
+      </a>
+    </div>
+  </form>
+</div>

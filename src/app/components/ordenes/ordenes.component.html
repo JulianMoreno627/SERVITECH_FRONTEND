@@ -1,0 +1,206 @@
+<div class="space-y-8">
+  <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+    <div>
+      <h2 class="text-3xl font-black text-slate-800 tracking-tight">Órdenes de Servicio</h2>
+      <p class="text-slate-500 font-medium">Gestiona y supervisa todas las reparaciones activas</p>
+    </div>
+    <button class="flex items-center space-x-2 px-6 py-3 bg-blue-600 text-white rounded-2xl font-bold hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-600/20 transition-all transform active:scale-95">
+      <i class="fas fa-plus"></i>
+      <span>Nueva Orden</span>
+    </button>
+  </div>
+
+  <div class="flex flex-col md:flex-row gap-4 mb-6">
+    <div class="relative flex-1">
+      <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+      <input type="text" 
+             [(ngModel)]="filtroTexto" 
+             (ngModelChange)="onFiltroChange()"
+             placeholder="Buscar por cliente, equipo o ID..." 
+             class="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all">
+    </div>
+    <select [(ngModel)]="filtroEstado" 
+            (ngModelChange)="onFiltroChange()"
+            class="px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-medium text-slate-600">
+      <option value="">Todos los estados</option>
+      <option *ngFor="let est of estados" [value]="est">{{ est }}</option>
+    </select>
+  </div>
+
+  <div *ngIf="loading" class="flex flex-col items-center justify-center py-20">
+    <div class="relative w-16 h-16">
+      <div class="absolute inset-0 border-4 border-blue-100 rounded-full"></div>
+      <div class="absolute inset-0 border-4 border-blue-600 rounded-full border-t-transparent animate-spin"></div>
+    </div>
+    <p class="mt-4 text-slate-500 font-bold">Obteniendo datos del servidor...</p>
+  </div>
+
+  <div *ngIf="!loading && ordenesFiltradas.length === 0" class="flex flex-col items-center justify-center py-20 bg-slate-50 rounded-[2rem] border-2 border-dashed border-slate-200">
+    <div class="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mb-4 text-slate-300">
+      <i class="fas fa-folder-open text-4xl"></i>
+    </div>
+    <p class="text-slate-500 font-bold text-lg">No se encontraron órdenes</p>
+    <p class="text-slate-400 text-sm">Prueba con otros criterios de búsqueda o crea una nueva</p>
+  </div>
+
+  <div *ngIf="!loading && ordenesFiltradas.length > 0" class="overflow-hidden bg-white rounded-3xl border border-slate-100 shadow-sm">
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-slate-100">
+        <thead>
+          <tr class="bg-slate-50/50">
+            <th class="px-6 py-5 text-left text-[11px] font-black text-slate-400 uppercase tracking-widest">ID Orden</th>
+            <th class="px-6 py-5 text-left text-[11px] font-black text-slate-400 uppercase tracking-widest">Cliente</th>
+            <th class="px-6 py-5 text-left text-[11px] font-black text-slate-400 uppercase tracking-widest">Equipo</th>
+            <th class="px-6 py-5 text-left text-[11px] font-black text-slate-400 uppercase tracking-widest">Estado</th>
+            <th class="px-6 py-5 text-left text-[11px] font-black text-slate-400 uppercase tracking-widest">Fecha Ingreso</th>
+            <th class="px-6 py-5 text-right text-[11px] font-black text-slate-400 uppercase tracking-widest">Acciones</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-50">
+          <tr *ngFor="let orden of ordenesFiltradas" class="hover:bg-blue-50/30 transition-all group">
+            <td class="px-6 py-4">
+              <span class="text-sm font-black text-blue-600 bg-blue-50 px-3 py-1.5 rounded-xl">#{{ orden.id }}</span>
+            </td>
+            <td class="px-6 py-4">
+              <div class="flex items-center space-x-3">
+                <div class="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center text-slate-500 font-bold text-xs">
+                  {{ (orden.cliente?.nombre?.charAt(0) || '?').toUpperCase() }}
+                </div>
+                <span class="text-sm font-bold text-slate-700">{{ orden.cliente?.nombre || 'Sin cliente' }}</span>
+              </div>
+            </td>
+            <td class="px-6 py-4">
+              <div class="flex flex-col">
+                <span class="text-sm font-bold text-slate-700">{{ orden.equipo?.marca }} {{ orden.equipo?.modelo }}</span>
+                <span class="text-[10px] text-slate-400 font-medium uppercase tracking-tight">{{ orden.equipo?.tipo || 'Equipo General' }}</span>
+              </div>
+            </td>
+            <td class="px-6 py-4">
+              <div class="relative inline-block text-left group/status">
+                <span [class]="'inline-flex items-center px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider shadow-sm cursor-pointer transition-all hover:ring-2 hover:ring-offset-1 ' + getEstadoClass(orden.estado)">
+                  <span class="w-1.5 h-1.5 rounded-full mr-2" [class]="getEstadoDotClass(orden.estado)"></span>
+                  {{ orden.estado }}
+                  <i class="fas fa-chevron-down ml-2 opacity-50"></i>
+                </span>
+                <!-- Dropdown de estados -->
+                <div class="absolute left-0 mt-2 w-48 rounded-2xl shadow-xl bg-white ring-1 ring-black ring-opacity-5 z-10 hidden group-hover/status:block animate-in fade-in slide-in-from-top-2 duration-200">
+                  <div class="py-2 px-1" role="menu">
+                    <button *ngFor="let est of estados" 
+                            (click)="cambiarEstado(orden.id, est)"
+                            class="w-full text-left px-4 py-2 text-[10px] font-bold uppercase tracking-wider text-slate-600 hover:bg-slate-50 hover:text-blue-600 rounded-xl transition-colors flex items-center"
+                            [class.text-blue-600]="est === orden.estado">
+                      <span class="w-1.5 h-1.5 rounded-full mr-2" [class]="getEstadoDotClass(est)"></span>
+                      {{ est }}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </td>
+            <td class="px-6 py-4">
+              <span class="text-sm font-medium text-slate-500">{{ orden.fechaIngreso | date:'dd MMM, yyyy' }}</span>
+            </td>
+            <td class="px-6 py-4 text-right">
+              <div class="flex justify-end space-x-2">
+                <!-- Acciones para Admin/Tecnico -->
+                <ng-container *ngIf="userRol !== 'CLIENTE'">
+                  <button title="Ver Detalles" class="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-100 text-slate-600 hover:bg-blue-600 hover:text-white transition-all transform hover:scale-110">
+                    <i class="fas fa-eye text-sm"></i>
+                  </button>
+                  <button (click)="editarOrden(orden)" title="Editar Orden" class="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-100 text-slate-600 hover:bg-amber-500 hover:text-white transition-all transform hover:scale-110">
+                    <i class="fas fa-edit text-sm"></i>
+                  </button>
+                  <button (click)="eliminarOrden(orden.id)" title="Eliminar" class="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-100 text-slate-600 hover:bg-red-500 hover:text-white transition-all transform hover:scale-110">
+                    <i class="fas fa-trash-can text-sm"></i>
+                  </button>
+                </ng-container>
+
+                <!-- Acciones para Cliente -->
+                <ng-container *ngIf="userRol === 'CLIENTE'">
+                  <button *ngIf="orden.estado === 'LISTO' || orden.estado === 'ENTREGADO'" 
+                          (click)="verFactura(orden.id)"
+                          class="flex items-center space-x-2 px-4 py-2 bg-emerald-500 text-white rounded-xl font-bold hover:bg-emerald-600 transition-all transform active:scale-95 text-xs">
+                    <i class="fas fa-file-invoice-dollar"></i>
+                    <span>Ver Factura</span>
+                  </button>
+                  <span *ngIf="orden.estado !== 'LISTO' && orden.estado !== 'ENTREGADO'" class="text-xs text-slate-400 font-medium">En proceso...</span>
+                </ng-container>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Modal de Factura -->
+  <div *ngIf="showFacturaModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300">
+    <div class="bg-white w-full max-w-lg rounded-[2.5rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
+      <div class="p-8">
+        <div class="flex justify-between items-start mb-8">
+          <div>
+            <div class="flex items-center space-x-2 mb-2">
+              <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white">
+                <i class="fas fa-tools"></i>
+              </div>
+              <h3 class="text-2xl font-black text-slate-800">ServiTech</h3>
+            </div>
+            <p class="text-slate-500 font-bold uppercase tracking-widest text-[10px]">Factura de Servicio</p>
+          </div>
+          <button (click)="cerrarFactura()" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-400 transition-colors">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+
+        <div class="bg-slate-50 rounded-3xl p-6 mb-8 border border-slate-100">
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <p class="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">Nº Factura</p>
+              <p class="text-sm font-bold text-slate-700">{{ facturaSeleccionada?.numeroFactura }}</p>
+            </div>
+            <div class="text-right">
+              <p class="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">Fecha</p>
+              <p class="text-sm font-bold text-slate-700">{{ facturaSeleccionada?.fechaEmision | date:'dd/MM/yyyy' }}</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="space-y-4 mb-8">
+          <h4 class="text-xs font-black text-slate-400 uppercase tracking-widest px-2">Detalles</h4>
+          <div class="divide-y divide-slate-100">
+            <div *ngFor="let detalle of facturaSeleccionada?.detalles" class="py-3 px-2 flex justify-between items-center">
+              <span class="text-sm font-bold text-slate-600">{{ detalle.concepto }}</span>
+              <span class="text-sm font-black text-slate-800">{{ detalle.subtotal | currency }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-blue-600 rounded-3xl p-6 text-white flex justify-between items-center shadow-lg shadow-blue-600/20">
+          <div>
+            <p class="text-[10px] font-black uppercase tracking-widest opacity-70 mb-1">Total a Pagar</p>
+            <p class="text-3xl font-black">{{ facturaSeleccionada?.total | currency }}</p>
+          </div>
+          <div class="text-right">
+            <span *ngIf="facturaSeleccionada?.pagada" class="inline-flex items-center px-3 py-1 bg-white/20 rounded-full text-[10px] font-black uppercase tracking-widest">
+              <i class="fas fa-check-circle mr-1"></i> Pagada
+            </span>
+            <i *ngIf="!facturaSeleccionada?.pagada" class="fas fa-receipt text-4xl opacity-20"></i>
+          </div>
+        </div>
+
+        <div class="mt-8 flex space-x-4 justify-center">
+          <button *ngIf="!facturaSeleccionada?.pagada && userRol === 'CLIENTE'" 
+                  (click)="pagarFactura(facturaSeleccionada.id)" 
+                  class="flex-1 px-8 py-4 bg-emerald-500 text-white rounded-2xl font-black hover:bg-emerald-600 transition-all transform active:scale-95 shadow-xl shadow-emerald-500/20 flex items-center justify-center space-x-2">
+            <i class="fas fa-credit-card"></i>
+            <span>Pagar Ahora</span>
+          </button>
+          <button (click)="cerrarFactura()" 
+                  [class]="(facturaSeleccionada?.pagada || userRol !== 'CLIENTE') ? 'w-full' : 'flex-1'"
+                  class="px-8 py-4 bg-slate-100 text-slate-600 rounded-2xl font-bold hover:bg-slate-200 transition-all transform active:scale-95">
+            {{ (facturaSeleccionada?.pagada || userRol !== 'CLIENTE') ? 'Cerrar' : 'Cancelar' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

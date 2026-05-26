@@ -1,0 +1,362 @@
+<div class="flex h-screen bg-slate-50 font-['Plus_Jakarta_Sans']">
+  <!-- Sidebar -->
+  <aside [class.hidden]="!sidebarOpen" class="w-72 bg-slate-950 text-white flex flex-col transition-all duration-500 shadow-2xl relative z-20">
+    <div class="p-8 flex items-center space-x-4">
+      <div class="w-12 h-12 bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/20 transform hover:rotate-12 transition-transform">
+        <i class="fas fa-screwdriver-wrench text-xl text-white"></i>
+      </div>
+      <span class="text-2xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">ServiTech</span>
+    </div>
+    
+    <div class="px-6 mb-6">
+      <div class="h-px bg-gradient-to-r from-transparent via-slate-700 to-transparent w-full"></div>
+    </div>
+
+    <nav class="flex-1 px-4 space-y-2 overflow-y-auto custom-scrollbar">
+      <a routerLink="/dashboard" routerLinkActive="bg-white/10 text-white shadow-xl ring-1 ring-white/20" [routerLinkActiveOptions]="{exact: true}" class="flex items-center space-x-3 p-4 rounded-2xl hover:bg-white/5 transition-all duration-300 group">
+        <div class="w-8 h-8 rounded-lg flex items-center justify-center bg-slate-800 group-hover:bg-blue-600 transition-colors">
+          <i class="fas fa-chart-pie text-sm"></i>
+        </div>
+        <span class="font-bold text-sm tracking-wide">Panel Principal</span>
+      </a>
+      
+      <a *ngIf="isTecnico() || isAdmin()" routerLink="/dashboard/ordenes" routerLinkActive="bg-white/10 text-white shadow-xl ring-1 ring-white/20" class="flex items-center space-x-3 p-4 rounded-2xl hover:bg-white/5 transition-all duration-300 group">
+        <div class="w-8 h-8 rounded-lg flex items-center justify-center bg-slate-800 group-hover:bg-blue-600 transition-colors">
+          <i class="fas fa-clipboard-list text-sm"></i>
+        </div>
+        <span class="font-bold text-sm tracking-wide">Órdenes de Servicio</span>
+      </a>
+      
+      <a *ngIf="isCliente()" routerLink="/dashboard/ordenes" routerLinkActive="bg-white/10 text-white shadow-xl ring-1 ring-white/20" class="flex items-center space-x-3 p-4 rounded-2xl hover:bg-white/5 transition-all duration-300 group">
+        <div class="w-8 h-8 rounded-lg flex items-center justify-center bg-slate-800 group-hover:bg-blue-600 transition-colors">
+          <i class="fas fa-clock-rotate-left text-sm"></i>
+        </div>
+        <span class="font-bold text-sm tracking-wide">Mis Reparaciones</span>
+      </a>
+    </nav>
+
+    <div class="p-6 m-4 bg-gradient-to-b from-slate-900 to-slate-950 rounded-[2rem] border border-slate-800/50 shadow-inner">
+      <div class="flex items-center space-x-4 mb-6">
+        <div class="relative">
+          <div class="w-14 h-14 bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg font-black text-xl border-2 border-white/10">
+            {{ usuario?.charAt(0)?.toUpperCase() }}
+          </div>
+          <div class="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 border-4 border-slate-900 rounded-full"></div>
+        </div>
+        <div class="overflow-hidden">
+          <p class="text-sm font-black truncate text-white tracking-tight">{{ usuario }}</p>
+          <div class="inline-flex px-2 py-0.5 bg-blue-500/10 rounded-full border border-blue-500/20">
+            <p class="text-[9px] uppercase tracking-tighter text-blue-400 font-black">{{ rol }}</p>
+          </div>
+        </div>
+      </div>
+      <button (click)="logout()" class="w-full py-3.5 bg-rose-500/10 hover:bg-rose-500 text-rose-500 hover:text-white border border-rose-500/20 rounded-2xl text-xs font-black transition-all duration-300 flex items-center justify-center space-x-2 group">
+        <i class="fas fa-sign-out-alt group-hover:-translate-x-1 transition-transform"></i>
+        <span>Cerrar Sesión</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="flex-1 flex flex-col overflow-hidden relative">
+    <!-- Header -->
+    <header class="bg-white/70 backdrop-blur-xl border-b border-slate-200/60 px-10 py-6 flex justify-between items-center z-10 shadow-sm">
+      <div class="flex items-center space-x-6">
+        <button (click)="toggleSidebar()" class="w-12 h-12 flex items-center justify-center rounded-2xl bg-slate-50 text-slate-400 hover:bg-slate-900 hover:text-white transition-all duration-300 shadow-sm hover:shadow-xl hover:shadow-slate-900/10">
+          <i class="fas fa-bars-staggered"></i>
+        </button>
+        <div>
+          <h1 class="text-2xl font-black text-slate-900 tracking-tight">Panel de Gestión</h1>
+          <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mt-0.5">Bienvenido de nuevo, {{ usuario }}</p>
+        </div>
+      </div>
+      
+      <div class="flex items-center space-x-6">
+        <div class="hidden md:flex flex-col items-end pr-6 border-r border-slate-200">
+          <span class="text-sm font-black text-slate-900">{{ today | date:'EEEE, d MMMM' | titlecase }}</span>
+          <span class="text-[10px] text-emerald-500 uppercase tracking-widest font-black flex items-center">
+            <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-2 animate-pulse"></span>
+            Sistema Operativo
+          </span>
+        </div>
+        <div class="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-400 hover:text-blue-600 cursor-pointer transition-colors relative group">
+          <i class="fas fa-bell"></i>
+          <span class="absolute top-3 right-3 w-2.5 h-2.5 bg-rose-500 border-2 border-white rounded-full group-hover:scale-125 transition-transform"></span>
+        </div>
+      </div>
+    </header>
+
+    <div class="flex-1 overflow-y-auto p-10 custom-scrollbar relative">
+      <!-- Background elements -->
+      <div class="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-96 h-96 bg-blue-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30"></div>
+      
+      <!-- Stats Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-10 relative">
+        <!-- Total Órdenes (Visible para todos) -->
+        <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-500 group">
+          <div class="flex items-center justify-between mb-6">
+            <div class="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-all duration-500 shadow-inner">
+              <i class="fas fa-file-invoice text-xl"></i>
+            </div>
+            <div class="px-3 py-1 bg-blue-50 rounded-full border border-blue-100">
+              <span class="text-[9px] font-black text-blue-600 uppercase tracking-tighter">{{ isCliente() ? 'Mis Órdenes' : 'Total Órdenes' }}</span>
+            </div>
+          </div>
+          <p class="text-xs text-slate-400 font-black uppercase tracking-widest mb-1">{{ isCliente() ? 'Mis Reparaciones' : 'Total Sistema' }}</p>
+          <p class="text-4xl font-black text-slate-900 tracking-tighter">{{ stats.totalOrdenes || 0 }}</p>
+        </div>
+
+        <!-- Pendientes (Visible para todos) -->
+        <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 hover:shadow-2xl hover:shadow-amber-500/10 transition-all duration-500 group">
+          <div class="flex items-center justify-between mb-6">
+            <div class="w-14 h-14 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center group-hover:bg-amber-600 group-hover:text-white transition-all duration-500 shadow-inner">
+              <i class="fas fa-clock text-xl"></i>
+            </div>
+            <div class="px-3 py-1 bg-amber-50 rounded-full border border-amber-100">
+              <span class="text-[9px] font-black text-amber-600 uppercase tracking-tighter">En Curso</span>
+            </div>
+          </div>
+          <p class="text-xs text-slate-400 font-black uppercase tracking-widest mb-1">Pendientes</p>
+          <p class="text-4xl font-black text-slate-900 tracking-tighter">{{ stats.ordenesPendientes || 0 }}</p>
+        </div>
+
+        <!-- Técnicos Libres (Solo Admin/Tecnico) -->
+        <div *ngIf="!isCliente()" class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 hover:shadow-2xl hover:shadow-emerald-500/10 transition-all duration-500 group">
+          <div class="flex items-center justify-between mb-6">
+            <div class="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition-all duration-500 shadow-inner">
+              <i class="fas fa-user-check text-xl"></i>
+            </div>
+            <div class="px-3 py-1 bg-emerald-50 rounded-full border border-emerald-100">
+              <span class="text-[9px] font-black text-emerald-600 uppercase tracking-tighter">Disponibles</span>
+            </div>
+          </div>
+          <p class="text-xs text-slate-400 font-black uppercase tracking-widest mb-1">Personal Libre</p>
+          <p class="text-4xl font-black text-slate-900 tracking-tighter">{{ stats.tecnicosDisponibles || 0 }}</p>
+        </div>
+
+        <!-- Ingresos Mes (Solo Admin) -->
+        <div *ngIf="isAdmin()" class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-500 group">
+          <div class="flex items-center justify-between mb-6">
+            <div class="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-all duration-500 shadow-inner">
+              <i class="fas fa-dollar-sign text-xl"></i>
+            </div>
+            <div class="px-3 py-1 bg-indigo-50 rounded-full border border-indigo-100">
+              <span class="text-[9px] font-black text-indigo-600 uppercase tracking-tighter">Mensual</span>
+            </div>
+          </div>
+          <p class="text-xs text-slate-400 font-black uppercase tracking-widest mb-1">Ingresos</p>
+          <p class="text-4xl font-black text-slate-900 tracking-tighter">${{ stats.ingresosTotales | number }}</p>
+        </div>
+
+        <!-- Botón Solicitar Reparación (Solo Cliente) -->
+        <div *ngIf="isCliente()" routerLink="/dashboard/solicitud" class="bg-gradient-to-tr from-blue-600 to-indigo-700 p-8 rounded-[2.5rem] shadow-lg shadow-blue-500/20 hover:scale-[1.02] transition-all duration-300 cursor-pointer flex flex-col justify-center border border-white/10 group overflow-hidden relative">
+          <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-white/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700"></div>
+          <div class="relative z-10">
+            <div class="w-14 h-14 bg-white/20 text-white rounded-2xl flex items-center justify-center mb-6">
+              <i class="fas fa-plus text-xl"></i>
+            </div>
+            <p class="text-white font-black text-xl leading-tight">Solicitar Nueva Reparación</p>
+            <p class="text-blue-100 text-xs font-bold uppercase tracking-widest mt-2">Agenda tu servicio ahora</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Router Outlet for Children -->
+      <div class="bg-white/80 backdrop-blur-md rounded-[3rem] shadow-xl shadow-slate-200/50 border border-white p-10 min-h-[600px] relative overflow-hidden group/content">
+        <!-- Subtle background detail -->
+        <div class="absolute -bottom-20 -right-20 w-80 h-80 bg-slate-50 rounded-full group-hover/content:scale-110 transition-transform duration-1000"></div>
+        <div class="relative z-10">
+          <!-- Vista principal del dashboard (solo si no hay ruta hija activa) -->
+          <div *ngIf="router.url === '/dashboard'">
+            <div *ngIf="isCliente()" class="space-y-8 animate-fade-in">
+            <div class="flex justify-between items-center">
+              <h3 class="text-2xl font-black text-slate-900 tracking-tight">Mis Equipos en Reparación</h3>
+              <a routerLink="/dashboard/ordenes" class="text-sm font-bold text-blue-600 hover:text-blue-700">Ver historial completo →</a>
+            </div>
+
+              <div *ngIf="misOrdenes.length === 0" class="flex flex-col items-center justify-center py-20 bg-slate-50 rounded-[2.5rem] border-2 border-dashed border-slate-200">
+                <div class="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mb-4 text-slate-300">
+                  <i class="fas fa-tools text-2xl"></i>
+                </div>
+                <p class="text-slate-500 font-bold">No tienes reparaciones activas</p>
+                <button routerLink="/dashboard/solicitud" class="mt-4 text-sm font-black text-blue-600 hover:scale-105 transition-transform">Solicitar una ahora</button>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div *ngFor="let orden of misOrdenes" class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-xl transition-all group">
+                  <div class="flex justify-between items-start mb-4">
+                    <div class="flex items-center space-x-3">
+                      <div class="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-plug"></i>
+                      </div>
+                      <div>
+                        <h4 class="font-black text-slate-900">{{ orden.equipo?.tipo }}</h4>
+                        <p class="text-xs text-slate-400 font-bold">{{ orden.equipo?.marca }} {{ orden.equipo?.modelo }}</p>
+                      </div>
+                    </div>
+                    <span [class]="'px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ' + 
+                      (orden.estado === 'PENDIENTE' ? 'bg-amber-50 text-amber-600' : 
+                       orden.estado === 'EN_REPARACION' ? 'bg-blue-50 text-blue-600' : 
+                       'bg-emerald-50 text-emerald-600')">
+                      {{ orden.estado }}
+                    </span>
+                  </div>
+                  <div class="h-px bg-slate-50 w-full mb-4"></div>
+                  <div class="flex justify-between items-center text-xs mb-4">
+                    <span class="text-slate-400 font-bold uppercase tracking-tighter">Fecha Ingreso</span>
+                    <span class="text-slate-600 font-black">{{ orden.fechaIngreso | date:'dd/MM/yyyy' }}</span>
+                  </div>
+
+                  <!-- Botón Factura en el Dashboard -->
+                  <div *ngIf="orden.estado === 'LISTO' || orden.estado === 'ENTREGADO'" class="pt-2">
+                    <button (click)="verFactura(orden.id)" 
+                            class="w-full flex items-center justify-center space-x-2 py-3 bg-emerald-500 text-white rounded-2xl font-bold hover:bg-emerald-600 transition-all transform active:scale-95 text-xs shadow-lg shadow-emerald-500/20">
+                      <i class="fas fa-file-invoice-dollar"></i>
+                      <span>Ver Factura</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Vista principal para Admin/Tecnico -->
+            <div *ngIf="!isCliente()" class="space-y-8 animate-fade-in">
+              <div class="flex justify-between items-center">
+                <h3 class="text-2xl font-black text-slate-900 tracking-tight">
+                  {{ isTecnico() ? 'Órdenes para Revisar' : 'Resumen del Sistema' }}
+                </h3>
+                <a routerLink="/dashboard/ordenes" class="text-sm font-bold text-blue-600 hover:text-blue-700">Ver todas las órdenes →</a>
+              </div>
+
+              <!-- Lista de órdenes para el Técnico -->
+              <div *ngIf="isTecnico()">
+                <div *ngIf="ordenesTecnico.length === 0" class="flex flex-col items-center justify-center py-20 bg-slate-50 rounded-[2.5rem] border-2 border-dashed border-slate-200">
+                  <div class="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mb-4 text-slate-300">
+                    <i class="fas fa-clipboard-check text-2xl"></i>
+                  </div>
+                  <p class="text-slate-500 font-bold">No tienes órdenes pendientes ni asignadas</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div *ngFor="let orden of ordenesTecnico" class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-xl transition-all group">
+                    <div class="flex justify-between items-start mb-4">
+                      <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center">
+                          <i class="fas fa-tools"></i>
+                        </div>
+                        <div>
+                          <h4 class="font-black text-slate-900">{{ orden.equipo?.tipo }}</h4>
+                          <p class="text-xs text-slate-400 font-bold">{{ orden.equipo?.marca }} {{ orden.equipo?.modelo }}</p>
+                        </div>
+                      </div>
+                      <span [class]="'px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ' + 
+                        (orden.estado === 'PENDIENTE' ? 'bg-amber-50 text-amber-600' : 
+                         'bg-blue-50 text-blue-600')">
+                        {{ orden.estado }}
+                      </span>
+                    </div>
+                    <div class="h-px bg-slate-50 w-full mb-4"></div>
+                    <div class="flex flex-col space-y-2">
+                      <div class="flex justify-between items-center text-xs">
+                        <span class="text-slate-400 font-bold uppercase tracking-tighter">Cliente</span>
+                        <span class="text-slate-600 font-black">{{ orden.cliente?.nombre }}</span>
+                      </div>
+                      <div class="flex justify-between items-center text-xs">
+                        <span class="text-slate-400 font-bold uppercase tracking-tighter">Problema</span>
+                        <span class="text-slate-600 font-bold truncate max-w-[150px]">{{ orden.equipo?.descripcionFalla }}</span>
+                      </div>
+                    </div>
+                    <button routerLink="/dashboard/ordenes" class="mt-6 w-full py-3 bg-slate-900 text-white rounded-2xl font-bold text-xs hover:bg-blue-600 transition-all transform active:scale-95">
+                      Gestionar Orden
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Vista para Admin -->
+              <div *ngIf="isAdmin()" class="flex flex-col items-center justify-center py-20 bg-slate-50 rounded-[2.5rem] border border-slate-100">
+                <i class="fas fa-chart-line text-6xl text-slate-200 mb-6"></i>
+                <h3 class="text-xl font-black text-slate-400">Panel de Administración</h3>
+                <p class="text-slate-400 text-sm mt-2">Utiliza el menú lateral para gestionar técnicos, repuestos y clientes.</p>
+              </div>
+            </div>
+          </div>
+
+          <router-outlet></router-outlet>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Modal de Factura (Copiado de ordenes.component.html para consistencia) -->
+  <div *ngIf="showFacturaModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300">
+    <div class="bg-white w-full max-w-lg rounded-[2.5rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
+      <div class="p-8">
+        <div class="flex justify-between items-start mb-8">
+          <div>
+            <div class="flex items-center space-x-2 mb-2">
+              <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white">
+                <i class="fas fa-tools"></i>
+              </div>
+              <h3 class="text-2xl font-black text-slate-800">ServiTech</h3>
+            </div>
+            <p class="text-slate-500 font-bold uppercase tracking-widest text-[10px]">Factura de Servicio</p>
+          </div>
+          <button (click)="cerrarFactura()" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-400 transition-colors">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+
+        <div class="bg-slate-50 rounded-3xl p-6 mb-8 border border-slate-100">
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <p class="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">Nº Factura</p>
+              <p class="text-sm font-bold text-slate-700">{{ facturaSeleccionada?.numeroFactura }}</p>
+            </div>
+            <div class="text-right">
+              <p class="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">Fecha</p>
+              <p class="text-sm font-bold text-slate-700">{{ facturaSeleccionada?.fechaEmision | date:'dd/MM/yyyy' }}</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="space-y-4 mb-8">
+          <h4 class="text-xs font-black text-slate-400 uppercase tracking-widest px-2">Detalles</h4>
+          <div class="divide-y divide-slate-100 max-h-40 overflow-y-auto custom-scrollbar">
+            <div *ngFor="let detalle of facturaSeleccionada?.detalles" class="py-3 px-2 flex justify-between items-center">
+              <span class="text-sm font-bold text-slate-600">{{ detalle.concepto }}</span>
+              <span class="text-sm font-black text-slate-800">{{ detalle.subtotal | currency }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-blue-600 rounded-3xl p-6 text-white flex justify-between items-center shadow-lg shadow-blue-600/20">
+          <div>
+            <p class="text-[10px] font-black uppercase tracking-widest opacity-70 mb-1">Total a Pagar</p>
+            <p class="text-3xl font-black">{{ facturaSeleccionada?.total | currency }}</p>
+          </div>
+          <div class="text-right">
+            <span *ngIf="facturaSeleccionada?.pagada" class="inline-flex items-center px-3 py-1 bg-white/20 rounded-full text-[10px] font-black uppercase tracking-widest">
+              <i class="fas fa-check-circle mr-1"></i> Pagada
+            </span>
+            <i *ngIf="!facturaSeleccionada?.pagada" class="fas fa-receipt text-4xl opacity-20"></i>
+          </div>
+        </div>
+
+        <div class="mt-8 flex space-x-4 justify-center">
+          <button *ngIf="!facturaSeleccionada?.pagada" 
+                  (click)="pagarFactura(facturaSeleccionada.id)" 
+                  class="flex-1 px-8 py-4 bg-emerald-500 text-white rounded-2xl font-black hover:bg-emerald-600 transition-all transform active:scale-95 shadow-xl shadow-emerald-500/20 flex items-center justify-center space-x-2">
+            <i class="fas fa-credit-card"></i>
+            <span>Pagar Ahora</span>
+          </button>
+          <button (click)="cerrarFactura()" 
+                  [class]="facturaSeleccionada?.pagada ? 'w-full' : 'flex-1'"
+                  class="px-8 py-4 bg-slate-100 text-slate-600 rounded-2xl font-bold hover:bg-slate-200 transition-all transform active:scale-95">
+            {{ facturaSeleccionada?.pagada ? 'Cerrar' : 'Cancelar' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
