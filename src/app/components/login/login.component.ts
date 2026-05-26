@@ -39,7 +39,15 @@ export class LoginComponent {
         },
         error: (err) => {
           this.loading = false;
-          this.error = 'Usuario o contraseña incorrectos';
+          console.error('Error en login:', err);
+          
+          if (err.status === 0) {
+            this.error = 'No se pudo conectar con el servidor (CORS o backend apagado).';
+          } else if (err.status === 401) {
+            this.error = 'Usuario o contraseña incorrectos';
+          } else {
+            this.error = `Error del servidor (${err.status}). Intente más tarde.`;
+          }
         }
       });
     }

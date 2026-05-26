@@ -46,12 +46,12 @@ export class RegisterComponent {
           }
 
           if (err.status === 404) {
-            this.error = 'El endpoint de registro no existe. Verifica que el backend correcto esté corriendo (SERVITECH-BACKEND) y que la URL sea http://localhost:8081/api.';
+            this.error = 'El endpoint de registro no existe. Verifica que el backend esté configurado correctamente.';
             return;
           }
 
           if (err.status === 0) {
-            this.error = 'No se pudo conectar con el servidor (backend apagado o CORS). Verifica que SERVITECH-BACKEND esté corriendo en http://localhost:8081.';
+            this.error = 'No se pudo conectar con el servidor (backend apagado o problemas de CORS).';
             return;
           }
 
