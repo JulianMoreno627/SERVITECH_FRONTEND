@@ -1,0 +1,17 @@
+<div class="nav-item-container" [style.padding-left.px]="nivel * 20">
+  <div class="nav-item-header" (click)="toggle()" [routerLink]="opcion.ruta ? [opcion.ruta] : null">
+    <span *ngIf="opcion.icono" class="material-icons">{{opcion.icono}}</span>
+    <span class="nav-item-label">{{opcion.nombre}}</span>
+    <span *ngIf="opcion.hijos && opcion.hijos.length > 0" class="material-icons expand-icon">
+      {{expanded ? 'expand_less' : 'expand_more'}}
+    </span>
+  </div>
+
+  <div *ngIf="expanded && opcion.hijos && opcion.hijos.length > 0" class="nav-item-children">
+    <app-nav-item 
+      *ngFor="let hijo of opcion.hijos" 
+      [opcion]="hijo" 
+      [nivel]="nivel + 1">
+    </app-nav-item>
+  </div>
+</div>

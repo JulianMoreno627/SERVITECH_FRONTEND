@@ -5,11 +5,14 @@ import { AuthService } from '../../services/auth.service';
 import { DashboardService } from '../../services/dashboard.service';
 import { Rol } from '../../models/auth.model';
 import { OrdenService } from '../../services/orden.service';
+import { Opcion } from '../../models/opcion.model';
+import { NavItemComponent } from '../nav-item/nav-item.component';
+import { MenuService } from '../../services/menu.service';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, NavItemComponent],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
 })
@@ -22,11 +25,15 @@ export class DashboardComponent implements OnInit {
   facturaSeleccionada: any = null;
   showFacturaModal: boolean = false;
 
+  // Menú dinámico
+  menuOpciones: Opcion[] = [];
+
   constructor(
     public authService: AuthService, 
     public dashboardService: DashboardService,
     public router: Router,
-    private ordenService: OrdenService
+    private ordenService: OrdenService,
+    private menuService: MenuService
   ) {}
 
   ngOnInit(): void {
@@ -37,6 +44,7 @@ export class DashboardComponent implements OnInit {
     this.usuario = localStorage.getItem('usuario');
     this.rol = this.authService.getRol();
     this.cargarEstadisticas();
+    this.cargarMenu();
     
     if (this.isCliente()) {
       this.cargarMisOrdenes();
@@ -44,6 +52,37 @@ export class DashboardComponent implements OnInit {
       this.cargarOrdenesTecnico();
     }
   }
+
+  cargarMenu(): void {
+     this.menuService.getMenu().subscribe({
+       next: (data) => {
+         this.menuOpciones = data;
+       },
+       error: (err) => {
+         console.error('Error al cargar el menú dinámico', err);
+         // Fallback con el menú de Gestión de Servicios restaurado
+         this.menuOpciones = [
+           {
+             id: 1,
+             nombre: 'ServiTech',
+             icono: 'build',
+             hijos: [
+               {
+                 id: 2,
+                 nombre: 'Gestión de Servicios',
+                 icono: 'assignment',
+                 hijos: [
+                   { id: 3, nombre: 'Panel Principal', ruta: '/dashboard', icono: 'dashboard' },
+                   { id: 4, nombre: 'Órdenes de Servicio', ruta: '/dashboard/ordenes', icono: 'list_alt' },
+                   { id: 5, nombre: 'Solicitar Reparación', ruta: '/dashboard/solicitud', icono: 'add_circle' }
+                 ]
+               }
+             ]
+           }
+         ];
+       }
+     });
+   }
 
   cargarEstadisticas(): void {
     this.dashboardService.getEstadisticas().subscribe({

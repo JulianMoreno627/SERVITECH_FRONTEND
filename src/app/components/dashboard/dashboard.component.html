@@ -13,26 +13,13 @@
     </div>
 
     <nav class="flex-1 px-4 space-y-2 overflow-y-auto custom-scrollbar">
-      <a routerLink="/dashboard" routerLinkActive="bg-white/10 text-white shadow-xl ring-1 ring-white/20" [routerLinkActiveOptions]="{exact: true}" class="flex items-center space-x-3 p-4 rounded-2xl hover:bg-white/5 transition-all duration-300 group">
-        <div class="w-8 h-8 rounded-lg flex items-center justify-center bg-slate-800 group-hover:bg-blue-600 transition-colors">
-          <i class="fas fa-chart-pie text-sm"></i>
-        </div>
-        <span class="font-bold text-sm tracking-wide">Panel Principal</span>
-      </a>
+      <div class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] px-4 mb-4 mt-6">Menú ServiTech</div>
       
-      <a *ngIf="isTecnico() || isAdmin()" routerLink="/dashboard/ordenes" routerLinkActive="bg-white/10 text-white shadow-xl ring-1 ring-white/20" class="flex items-center space-x-3 p-4 rounded-2xl hover:bg-white/5 transition-all duration-300 group">
-        <div class="w-8 h-8 rounded-lg flex items-center justify-center bg-slate-800 group-hover:bg-blue-600 transition-colors">
-          <i class="fas fa-clipboard-list text-sm"></i>
-        </div>
-        <span class="font-bold text-sm tracking-wide">Órdenes de Servicio</span>
-      </a>
-      
-      <a *ngIf="isCliente()" routerLink="/dashboard/ordenes" routerLinkActive="bg-white/10 text-white shadow-xl ring-1 ring-white/20" class="flex items-center space-x-3 p-4 rounded-2xl hover:bg-white/5 transition-all duration-300 group">
-        <div class="w-8 h-8 rounded-lg flex items-center justify-center bg-slate-800 group-hover:bg-blue-600 transition-colors">
-          <i class="fas fa-clock-rotate-left text-sm"></i>
-        </div>
-        <span class="font-bold text-sm tracking-wide">Mis Reparaciones</span>
-      </a>
+      <app-nav-item 
+        *ngFor="let opcion of menuOpciones" 
+        [opcion]="opcion" 
+        [nivel]="0">
+      </app-nav-item>
     </nav>
 
     <div class="p-6 m-4 bg-gradient-to-b from-slate-900 to-slate-950 rounded-[2rem] border border-slate-800/50 shadow-inner">
